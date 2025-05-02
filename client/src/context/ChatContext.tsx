@@ -7,6 +7,10 @@ import {
   useCallback,
 } from "react";
 import { getUserChats, createChatService } from "../services/chatService";
+import {
+  getMessagesService,
+  sendTextMessageService,
+} from "../services/messagesService";
 import { getAllUsers } from "../services/userService";
 import User from "../types/UserType.ts";
 
@@ -15,7 +19,18 @@ type ChatContextType = {
   isUserChatsLoading: boolean;
   userChatsError: string | null;
   potentialChats: any[];
+  currentChat: any;
   createChat: (firstId: string, secondId: string) => Promise<void>;
+  updateCurrentChat: (chat: any) => void;
+  messages: any[];
+  isMessagesLoading: boolean;
+  messagesError: string | null;
+  sendTextMessage: (
+    textMessage: string,
+    sender: string,
+    currentChatId: string,
+    setTextMessage: (text: string) => void
+  ) => Promise<void>;
 };
 
 const chatContext = createContext<ChatContextType | undefined>(undefined);
@@ -31,6 +46,17 @@ export const ChatContextProvider = ({
   const [isUserChatsLoading, setIsUserChatsLoading] = useState(true);
   const [userChatsError, setUserChatsError] = useState<string | null>(null);
   const [potentialChats, setPotentialChats] = useState<any[]>([]);
+  const [currentChat, setCurrentChat] = useState<any>(null);
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(true);
+  const [messagesError, setMessagesError] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState<any>(null);
+  const [sendTextMessageError, setSendTextMessageError] = useState<
+    string | null
+  >(null);
+
+  console.log("messages", messages);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -60,9 +86,9 @@ export const ChatContextProvider = ({
   useEffect(() => {
     const fetchUserChats = async () => {
       if (user?.id) {
-        const response = await getUserChats(user.id);
         setIsUserChatsLoading(true);
         setUserChatsError(null);
+        const response = await getUserChats(user.id);
 
         if (response.status >= 200 && response.status < 300) {
           const data = response.data;
@@ -79,6 +105,60 @@ export const ChatContextProvider = ({
 
     fetchUserChats();
   }, [user]);
+
+  useEffect(() => {
+    const getMessages = async () => {
+      setIsMessagesLoading(true);
+      setMessagesError(null);
+
+      const response = await getMessagesService(currentChat?._id);
+
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
+
+        setMessages(data);
+      } else {
+        setMessagesError("Error fetching user chats: " + response.statusText);
+      }
+
+      setIsMessagesLoading(false);
+    };
+
+    getMessages();
+  }, [currentChat]);
+
+  const sendTextMessage = useCallback(
+    async (
+      textMessage: string,
+      sender: string,
+      currentChatId: string,
+      setTextMessage: (text: string) => void
+    ) => {
+      if (!textMessage) return console.log("No message to send");
+      console.log(currentChatId);
+      const response = await sendTextMessageService(
+        textMessage,
+        sender,
+        currentChatId
+      );
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
+
+        setNewMessage(data);
+        setMessages((prevMessages) => [...prevMessages, data]);
+        setTextMessage("");
+      } else {
+        setSendTextMessageError(
+          "Error sending message: " + response.statusText
+        );
+      }
+    },
+    []
+  );
+
+  const updateCurrentChat = useCallback((chat: any) => {
+    setCurrentChat(chat);
+  }, []);
 
   const createChat = useCallback(async (firstId: string, secondId: string) => {
     const response = await createChatService(firstId, secondId);
@@ -97,7 +177,13 @@ export const ChatContextProvider = ({
         isUserChatsLoading,
         userChatsError,
         potentialChats,
+        currentChat,
         createChat,
+        updateCurrentChat,
+        messages,
+        isMessagesLoading,
+        messagesError,
+        sendTextMessage,
       }}
     >
       {children}

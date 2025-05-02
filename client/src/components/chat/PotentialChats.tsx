@@ -1,4 +1,3 @@
-import React from "react";
 import { useChatContext } from "../../context/ChatContext";
 import { FaCircle } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
@@ -6,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 const PotentialChats = () => {
   const { potentialChats, createChat } = useChatContext();
   const { user } = useAuth();
-  console.log("Potential Chats", potentialChats);
+
   return (
     <div className="flex flex-wrap gap-1">
       {potentialChats.length > 0 ? (

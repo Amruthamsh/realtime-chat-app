@@ -3,7 +3,7 @@ import { RxAvatar } from "react-icons/rx";
 
 const UserChat = ({ chat, user }: { chat: any; user: any }) => {
   const { recipient } = useFetchRecipient(chat, user);
-  console.log(chat);
+
   return (
     <div className="flex flex-row items-center border-2 rounded-lg p-2 hover:bg-gray-100 cursor-pointer">
       <RxAvatar className="text-teal-500" size={36} />
