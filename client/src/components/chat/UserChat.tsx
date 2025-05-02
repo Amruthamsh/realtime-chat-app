@@ -1,4 +1,4 @@
-import { useFetchRecipient } from "../hooks/useFetchRecipient";
+import { useFetchRecipient } from "../../hooks/useFetchRecipient";
 import { RxAvatar } from "react-icons/rx";
 
 const UserChat = ({ chat, user }: { chat: any; user: any }) => {
