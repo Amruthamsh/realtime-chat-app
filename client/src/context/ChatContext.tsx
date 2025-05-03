@@ -13,6 +13,7 @@ import {
 } from "../services/messagesService";
 import { getAllUsers } from "../services/userService";
 import User from "../types/UserType.ts";
+import { io } from "socket.io-client";
 
 type ChatContextType = {
   userChats: any[];
@@ -31,6 +32,7 @@ type ChatContextType = {
     currentChatId: string,
     setTextMessage: (text: string) => void
   ) => Promise<void>;
+  onlineUsers: any[];
 };
 
 const chatContext = createContext<ChatContextType | undefined>(undefined);
@@ -55,8 +57,31 @@ export const ChatContextProvider = ({
   const [sendTextMessageError, setSendTextMessageError] = useState<
     string | null
   >(null);
+  const [socket, setSocket] = useState<any>(null);
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
 
-  console.log("messages", messages);
+  console.log("onlineUsers", onlineUsers);
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:3000");
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (socket === null || user === null) return;
+    socket.emit("addNewUser", user?.id);
+    socket.on("getOnlineUsers", (res: any[]) => {
+      setOnlineUsers(res);
+    });
+
+    return () => {
+      socket.off("getOnlineUsers");
+    };
+  }, [socket]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -184,6 +209,7 @@ export const ChatContextProvider = ({
         isMessagesLoading,
         messagesError,
         sendTextMessage,
+        onlineUsers,
       }}
     >
       {children}

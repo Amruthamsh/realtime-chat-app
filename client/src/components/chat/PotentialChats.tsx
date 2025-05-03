@@ -3,7 +3,7 @@ import { FaCircle } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
 const PotentialChats = () => {
-  const { potentialChats, createChat } = useChatContext();
+  const { potentialChats, createChat, onlineUsers } = useChatContext();
   const { user } = useAuth();
 
   return (
@@ -15,10 +15,15 @@ const PotentialChats = () => {
             className="bg-blue-200 rounded-lg p-2 hover:bg-blue-300 cursor-pointer relative"
             onClick={() => createChat(potentialChatUser._id, user!.id)}
           >
-            <FaCircle
-              className="text-green-500 absolute bottom-7 right-0 -mr-1"
-              size={12}
-            />
+            {onlineUsers.some(
+              (user) => user.userId === potentialChatUser._id
+            ) && (
+              <FaCircle
+                className="text-green-500 absolute top-0 right-0 -mr-1"
+                size={12}
+              />
+            )}
+
             <h3 className="font-bold text-sm">{potentialChatUser.name}</h3>
           </div>
         ))
