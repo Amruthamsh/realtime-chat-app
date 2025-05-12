@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Notification from "./chat/Notification";
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -13,6 +14,7 @@ const NavBar = () => {
             Chat App
           </Link>
           <div className="flex items-center space-x-4">
+            <Notification />
             <span>Logged in as {user.name}</span>
             <button
               onClick={logout}
